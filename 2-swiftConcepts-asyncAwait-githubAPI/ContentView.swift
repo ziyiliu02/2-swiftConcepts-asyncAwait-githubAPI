@@ -34,3 +34,9 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
+struct GitHubUser: Codable {
+    let login: String
+    let avatarUrl: String
+    let bio: String
+}
