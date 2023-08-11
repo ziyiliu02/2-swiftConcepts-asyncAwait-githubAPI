@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    
     var body: some View {
         VStack(spacing: 20) {
             
@@ -27,6 +28,30 @@ struct ContentView: View {
         }
         .padding()
     }
+    
+    func getUser() async throws -> GitHubUser {
+        let endpoint = "https://api.github.com/users/a16z"
+        
+        guard let url = URL(string: endpoint) else {
+            throw GHError.invalidURL
+        }
+        
+        let session = URLSession.shared
+        let (data, response) = try await session.data(from: url)
+        
+        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            throw GHError.invalidResponse
+        }
+        
+        do {
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            return try decoder.decode(GitHubUser.self, from: data)
+        } catch {
+            throw GHError.invalidData
+        }
+    }
+    
 }
 
 struct ContentView_Previews: PreviewProvider {
@@ -39,4 +64,10 @@ struct GitHubUser: Codable {
     let login: String
     let avatarUrl: String
     let bio: String
+}
+
+enum GHError: Error {
+    case invalidURL
+    case invalidResponse
+    case invalidData
 }
